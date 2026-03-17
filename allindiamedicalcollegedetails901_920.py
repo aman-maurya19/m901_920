@@ -199,14 +199,23 @@ def scrape_college_info(driver,URLS):
         data["college_info"]["qa_count"] = int(float(val.replace("k", "")) * 1000) if "k" in val else int(val)
     except:
         pass
-
-    # ================= INSTITUTE TYPE + ESTD =================
-    for item in driver.find_elements(By.CSS_SELECTOR, "span.b00d1d"):
-        txt = item.text
-        if "Institute" in txt:
-            data["college_info"]["institute_type"] = txt
-        if "Estd" in txt:
-            data["college_info"]["established_year"] = re.search(r'\d{4}', txt).group()
+    elements = driver.find_elements(By.CSS_SELECTOR, "span.b00d1d")
+    
+    for i in range(len(elements)):
+        try:
+            elements = driver.find_elements(By.CSS_SELECTOR, "span.b00d1d")  # 🔥 refresh
+            txt = elements[i].text
+    
+            if "Institute" in txt:
+                data["college_info"]["institute_type"] = txt
+    
+            if "Estd" in txt:
+                match = re.search(r'\d{4}', txt)
+                if match:
+                    data["college_info"]["established_year"] = match.group()
+    
+        except StaleElementReferenceException:
+            print("♻️ retrying...")
 
     # ================= SECTION WAIT =================
 
